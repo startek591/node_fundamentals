@@ -20,6 +20,7 @@ module.exports = {
   create,
   edit,
   remove,
+  model: Product,
 };
 
 async function list(opts = {}) {
