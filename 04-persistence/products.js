@@ -34,13 +34,9 @@ async function list(opts = {}) {
   return products;
 }
 
-async function get(id) {
-  const products = JSON.parse(await fs.readFile(productsFile));
-
-  for (let i = 0; i < products.length; i++) {
-    if (products[i]._id === id) return products[i];
-  }
-  return null;
+async function get(_id) {
+  const product = await Product.findById(_id);
+  return product;
 }
 
 async function create(fields) {
