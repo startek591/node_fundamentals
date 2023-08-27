@@ -20,6 +20,7 @@ module.exports = {
   get,
   list,
   create,
+  edit,
 };
 
 async function list(opts = {}) {
@@ -36,10 +37,22 @@ async function list(opts = {}) {
 
 async function get(_id) {
   const product = await Product.findById(_id);
+
   return product;
 }
 
 async function create(fields) {
   const product = await new Product(fields).save();
+
+  return product;
+}
+
+async function edit(_id, change) {
+  const product = await get(_id);
+  Object.keys(change).forEach(function (key) {
+    product[key] = change[key];
+  });
+  await product.save();
+
   return product;
 }

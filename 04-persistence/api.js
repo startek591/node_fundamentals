@@ -48,7 +48,10 @@ async function createProduct(req, res, next) {
 
 async function editProduct(req, res, next) {
   try {
-    return res.json(req.body);
+    const change = req.body;
+    const product = await Products.edit(req.params.id, change);
+
+    res.json(product);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
