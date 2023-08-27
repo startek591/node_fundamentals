@@ -59,7 +59,8 @@ async function editProduct(req, res, next) {
 
 async function deleteProduct(req, res, next) {
   try {
-    return res.json({ success: true });
+    await Products.remove(req.params.id);
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

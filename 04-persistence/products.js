@@ -21,6 +21,7 @@ module.exports = {
   list,
   create,
   edit,
+  remove,
 };
 
 async function list(opts = {}) {
@@ -55,4 +56,8 @@ async function edit(_id, change) {
   await product.save();
 
   return product;
+}
+
+async function remove(_id) {
+  await Product.deleteOne({ _id });
 }
