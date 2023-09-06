@@ -1,7 +1,7 @@
 const cuid = require('cuid');
 const { isURL } = require('validator');
 
-const db = require('./db');
+const db = require('../db');
 
 const Product = db.model('Product', {
   _id: { type: String, default: cuid },
