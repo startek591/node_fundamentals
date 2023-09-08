@@ -44,6 +44,8 @@ async function listProducts(req, res) {
 
 async function createProduct(req, res, next) {
   try {
+    if (!req.isAdmin) return forbidden(next);
+
     const product = await Products.create(req.body);
     return res.json(product);
   } catch (err) {
@@ -53,6 +55,8 @@ async function createProduct(req, res, next) {
 
 async function editProduct(req, res, next) {
   try {
+    if (!req.isAdmin) return forbidden(next);
+
     const change = req.body;
     const product = await Products.edit(req.params.id, change);
 
@@ -64,6 +68,8 @@ async function editProduct(req, res, next) {
 
 async function deleteProduct(req, res, next) {
   try {
+    if (!req.isAdmin) return forbidden(next);
+
     await Products.remove(req.params.id);
     res.json({ success: true });
   } catch (err) {
@@ -93,4 +99,10 @@ async function createUser(req, res, next) {
   const user = await Users.create(req.body);
   const { username, email } = user;
   res.json({ username, email });
+}
+
+function forbidden(next) {
+  const err = new Error('Forbidden');
+  err.statusCode = 403;
+  return next(err);
 }
