@@ -10,6 +10,7 @@ module.exports = {
   deleteProduct,
   createOrder,
   listOrders,
+  createUser,
 };
 
 async function getProduct(req, res, next) {
