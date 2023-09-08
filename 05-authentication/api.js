@@ -1,5 +1,6 @@
 const Orders = require('./models/orders');
 const Products = require('./models/products');
+const Users = require('./models/users');
 
 module.exports = {
   getProduct,
@@ -85,4 +86,10 @@ async function listOrders(req, res, next) {
   });
 
   res.json(orders);
+}
+
+async function createUser(req, res, next) {
+  const user = await Users.create(req.body);
+  const { username, email } = user;
+  res.json({ username, email });
 }
