@@ -1,5 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const passport = require('passport');
+const Strategy = require('passport-local').Strategy;
+const sessionSecret = process.env.SESSION_SECRET || 'mark it zero';
+const adminPassword = process.env.ADMIN_PASSWORD || 'iamthewalrus';
 
 const api = require('./api');
 const middleware = require('./middleware');
@@ -10,17 +14,67 @@ const app = express();
 
 app.use(middleware.cors);
 app.use(bodyParser.json());
-app.get('/products', api.listProducts);
-app.post('/products', api.createProduct);
-app.get('/products/:id', api.getProduct);
-app.put('/products/:id', api.editProduct);
-app.delete('/products/:id', api.deleteProduct);
+app.use(
+  require('express-session')({
+    secret: sessionSecret,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
-app.get('/orders', api.listOrders);
-app.post('/orders', api.createOrder);
+app.use(passport.initialize());
+app.use(passport.session());
+
+const adminUser = {
+  id: 1,
+  username: 'admin',
+  password: adminPassword,
+};
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+  if (id === adminUser.id) {
+    done(null, adminUser);
+  } else {
+    done(null, null);
+  }
+});
+
+passport.use(
+  new Strategy((username, password, done) => {
+    if (username === adminUser.username && password === adminUser.password) {
+      return done(null, adminUser);
+    } else {
+      return done(null, false, { message: 'Incorrect username or password.' });
+    }
+  })
+);
+
+app.post('/login', passport.authenticate('local'), function (req, res) {
+  return res.json({ success: true });
+});
+
+app.get('/products', api.listProducts);
+app.post('/products', ensureAdmin, api.createProduct);
+app.get('/products/:id', api.getProduct);
+app.put('/products/:id', ensureAdmin, api.editProduct);
+app.delete('/products/:id', ensureAdmin, api.deleteProduct);
+
+app.get('/orders', ensureAdmin, api.listOrders);
+app.post('/orders', ensureAdmin, api.createOrder);
 
 app.use(middleware.handleValidationError);
 app.use(middleware.handleError);
 app.use(middleware.notFound);
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
+
+function ensureAdmin(req, res, next) {
+  const isAdmin = req.user && req.user.username === 'admin';
+  if (isAdmin) return next();
+
+  res.status(401).json({ error: 'Unauthorized' });
+}
