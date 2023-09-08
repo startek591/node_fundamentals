@@ -25,28 +25,18 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-const adminUser = {
-  id: 1,
-  username: 'admin',
-  password: adminPassword,
-};
-
 passport.serializeUser((user, done) => {
-  done(null, user.id);
+  done(null, user);
 });
 
-passport.deserializeUser((id, done) => {
-  if (id === adminUser.id) {
-    done(null, adminUser);
-  } else {
-    done(null, null);
-  }
+passport.deserializeUser((user, done) => {
+  done(null, user);
 });
 
 passport.use(
   new Strategy((username, password, done) => {
-    if (username === adminUser.username && password === adminUser.password) {
-      return done(null, adminUser);
+    if (username === 'admin' && password === adminPassword) {
+      return done(null, { username: 'admin' });
     } else {
       return done(null, false, { message: 'Incorrect username or password.' });
     }
